@@ -1,4 +1,3 @@
-Новое
 local slark = {}
 
 slark.Enable = Menu.AddOptionBool({ "Hero Specific", "slark" }, "enable", false)
