@@ -1,6 +1,6 @@
 local slark = {}
- 
- 
+
+
 slark.Enable = Menu.AddOptionBool({ "Hero Specific", "Slark" }, "Включить", false)
 slark.Ult = Menu.AddOptionBool({ "Hero Specific", "Slark" }, "Использовать Shadow Dance в комбо", false)
 Menu.AddOptionIcon(slark.Ult, "panorama/images/spellicons/slark_shadow_dance_png.vtex_c")
@@ -46,11 +46,13 @@ slark.Nullifier = Menu.AddOptionBool({ "Hero Specific", "Slark" }, "Исполь
 Menu.AddOptionIcon(slark.Nullifier, "panorama/images/items/nullifier_png.vtex_c")
 slark.NearestTarget = Menu.AddOptionSlider({"Hero Specific", "Slark"}, "Радиус поиска цели около курсора", 200, 800, 100)
 slark.optionIcon = Menu.AddOptionIcon({ "Hero Specific","Slark"}, "panorama/images/heroes/icons/npc_dota_hero_slark_png.vtex_c")
- 
+
+slark.lastTick = 0
+
 function slark.OnUpdate()
     me = Heroes.GetLocal()
     if not Menu.IsEnabled(slark.Enable) or not Engine.IsInGame() or not Heroes.GetLocal() then return end
-   
+ 
     if NPC.GetUnitName(me) ~= "npc_dota_hero_slark" then return end
     if not Entity.IsAlive(me) or NPC.IsStunned(me) or NPC.IsSilenced(me) then return end
     if Menu.IsEnabled(slark.Enable) then
@@ -61,7 +63,7 @@ function slark.OnUpdate()
             return end
     end
 end
- 
+
 function slark.Combo()
     target = nil
     myTeam = Entity.GetTeamNum(me)
@@ -80,8 +82,8 @@ function slark.Combo()
     dark = NPC.GetAbility(me, "slark_dark_pact")
     dark_range = 700
     cursor_pos = Input.GetWorldCursorPos()
- 
- 
+
+
     if ult and (max_hp*(Menu.GetValue(slark.Percent))/100 > health) and Ability.IsReady(ult) and Ability.IsCastable(ult, mana) then
         Ability.CastNoTarget(ult) end
     if Menu.IsEnabled(slark.Rem) and Menu.IsEnabled(slark.Battle_hunger) and dark and Ability.IsReady(dark) and Ability.IsCastable(dark, mana) and NPC.HasModifier(me, "modifier_axe_battle_hunger") then
@@ -107,22 +109,27 @@ function slark.Combo()
     if Menu.IsEnabled(slark.Rem) and Menu.IsEnabled(slark.Glimpse) and dark and Ability.IsReady(dark) and Ability.IsCastable(dark, mana) and NPC.HasModifier(me, "modifier_disruptor_glimpse") then
         Ability.CastNoTarget(dark) end
     if Menu.IsKeyDown(slark.Key) then
-        Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, enemy, Input.GetWorldCursorPos(), nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, me)
-        Player.AttackTarget(player, me, enemy)
+       -- Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, enemy, Input.GetWorldCursorPos(), nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, me)
+         Player.AttackTarget(Players.GetLocal(), me, enemy, true)
         if Menu.IsEnabled(slark.Abyssal) and abyssal and Ability.IsCastable(abyssal, mana) and Ability.IsReady(abyssal) then Ability.CastTarget(abyssal, enemy) end
         if Menu.IsEnabled(slark.Ult) and ult and Ability.IsCastable(ult, mana) and Ability.IsReady(ult) then Ability.CastNoTarget(ult) end
         if Menu.IsEnabled(slark.Bkb) and bkb and Ability.IsCastable(bkb, mana) and Ability.IsReady(bkb) then Ability.CastNoTarget(bkb) end
         if Menu.IsEnabled(slark.Orchid) and orchid and Ability.IsCastable(orchid, mana) and Ability.IsReady(orchid) then Ability.CastTarget(orchid, enemy) end
         if Menu.IsEnabled(slark.Nullifier) and nullifier and Ability.IsCastable(nullifier, mana) and Ability.IsReady(nullifier) then Ability.CastTarget(nullifier, enemy) end
         if Menu.IsEnabled(slark.Bloothorn) and bloodthorn and Ability.IsCastable(bloodthorn, mana) and Ability.IsReady(bloodthorn) then Ability.CastTarget(bloodthorn, enemy, true) end
-        if Menu.IsEnabled(slark.Pounce) and pounce and NPC.IsPositionInRange(me, Entity.GetAbsOrigin(enemy), dark_range) and Ability.IsCastable(pounce, mana) and Ability.IsReady(pounce) then
-            Player.AttackTarget(player, me, enemy)
-            Ability.CastNoTarget(pounce) end
+        Player.AttackTarget(Players.GetLocal(), me, enemy, true)  
+        if Menu.IsEnabled(slark.Pounce) and pounce and Ability.IsCastable(pounce, mana) and Ability.IsReady(pounce) and NPC.IsAttacking(me) then
+            Player.AttackTarget(Players.GetLocal(), me, enemy, true)    
+            Ability.CastNoTarget(pounce)
+            end
         if Menu.IsEnabled(slark.Dark) and dark and Ability.IsCastable(dark, mana) and Ability.IsReady(dark) then
             Ability.CastNoTarget(dark) end
+
     end
- 
- 
- 
+
+
+
 end
+
+
 return slark
