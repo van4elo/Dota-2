@@ -36,6 +36,10 @@ slark.Percent = Menu.AddOptionSlider({ "Hero Specific", "Slark" }, "Хп для 
 Menu.AddOptionIcon(slark.Percent, "panorama/images/spellicons/slark_shadow_dance_png.vtex_c")
 slark.Abyssal = Menu.AddOptionBool({ "Hero Specific", "Slark" }, "Использовать Abyssal Blade в комбо", false)
 Menu.AddOptionIcon(slark.Abyssal, "panorama/images/items/abyssal_blade_png.vtex_c")
+
+slark.Invis = Menu.AddOptionBool({ "Hero Specific", "Slark" }, "Использовать sb в комбо", false)
+Menu.AddOptionIcon(slark.Invis, "panorama/images/items/invis_sword_png.vtex_c")
+
 slark.Orchid = Menu.AddOptionBool({ "Hero Specific", "Slark" }, "Использовать Orchid в комбо", false)
 Menu.AddOptionIcon(slark.Orchid, "panorama/images/items/orchid_png.vtex_c")
 slark.Bloothorn = Menu.AddOptionBool({ "Hero Specific", "Slark" }, "Использовать Bloodthorn в комбо", false)
@@ -109,6 +113,11 @@ function slark.Combo()
     if Menu.IsEnabled(slark.Rem) and Menu.IsEnabled(slark.Glimpse) and dark and Ability.IsReady(dark) and Ability.IsCastable(dark, mana) and NPC.HasModifier(me, "modifier_disruptor_glimpse") then
         Ability.CastNoTarget(dark) end
     if Menu.IsKeyDown(slark.Key) then
+        if Menu.IsEnabled(slark.Invis) then
+            if NPC.HasModifier(me, "modifier_item_silver_edge_windwalk") or NPC.HasModifier(me, "modifier_item_invisibility_edge_windwalk") then
+                Player.AttackTarget(player, me, enemy) return end
+        end
+
        -- Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, enemy, Input.GetWorldCursorPos(), nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_HERO_ONLY, me)
          Player.AttackTarget(Players.GetLocal(), me, enemy, true)
         if Menu.IsEnabled(slark.Abyssal) and abyssal and Ability.IsCastable(abyssal, mana) and Ability.IsReady(abyssal) then Ability.CastTarget(abyssal, enemy) end
